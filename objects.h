@@ -403,6 +403,9 @@ typedef struct
    double*       newQual;         // current runoff quality (mass/L)
    double*       pondedQual;      // ponded surface water quality (mass)
    double*       totalLoad;       // total washoff load (lbs or kg)
+   double        Wu;              // 子流域蓄水容量
+   double        newW;			  // 子流域此时刻容量
+   double        oldW;			  // 子流域前一时刻容量   
 }  TSubcatch;
 
 
