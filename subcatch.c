@@ -110,6 +110,8 @@ static double getSubareaInfil(int j, TSubarea* subarea, double precip,
 static double findSubareaRunoff(TSubarea* subarea, double tRunoff);            //(5.1.008)
 static void   updatePondedDepth(TSubarea* subarea, double* tx);
 static void   getDdDt(double t, double* d, double* dddt);
+static double getRunoffTVGM(int j,int i, double precip, double evap,
+	double tStep);
 
 //=============================================================================
 
@@ -127,7 +129,7 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 {
     int    i, k, m;
     char*  id;
-    double x[9];
+    double x[10];
 
     // --- check for enough tokens
     if ( ntoks < 8 ) return error_setInpError(ERR_ITEMS, "");
@@ -150,19 +152,19 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
         return error_setInpError(ERR_NAME, tok[2]);
 
     // --- read area, %imperv, width, slope, & curb length
-    for ( i = 3; i < 8; i++)
+    for ( i = 3; i < 9; i++)
     {
         if ( ! getDouble(tok[i], &x[i]) || x[i] < 0.0 )
             return error_setInpError(ERR_NUMBER, tok[i]);
     }
 
     // --- if snowmelt object named, check that it exists
-    x[8] = -1;
-    if ( ntoks > 8 )
+    x[9] = -1;
+    if ( ntoks > 9 )
     {
-        k = project_findObject(SNOWMELT, tok[8]);
-        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[8]);
-        x[8] = k;
+        k = project_findObject(SNOWMELT, tok[9]);
+        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[9]);
+        x[9] = k;
     }
 
     // --- assign input values to subcatch's properties
@@ -175,9 +177,10 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
     Subcatch[j].width       = x[5] / UCF(LENGTH);
     Subcatch[j].slope       = x[6] / 100.0;
     Subcatch[j].curbLength  = x[7];
-
+	Subcatch[j].Wu = x[8];
+	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 2 ;
     // --- create the snow pack object if it hasn't already been created
-    if ( x[8] >= 0 )
+    if ( x[9] >= 0 )
     {
         if ( !snow_createSnowpack(j, (int)x[8]) )
             return error_setInpError(ERR_MEMORY, "");
@@ -654,6 +657,8 @@ double subcatch_getRunoff(int j, double tStep)
     double vOutflow  = 0.0;            // runoff volume leaving subcatch (ft3)
     double runoff    = 0.0;            // total runoff flow on subcatch (cfs)
     double evapRate  = 0.0;            // potential evaporation rate (ft/sec)
+	double runofftvgm = 0.0;
+
 
     // --- initialize shared water balance variables
     Vevap     = 0.0;
@@ -744,11 +749,79 @@ double subcatch_getRunoff(int j, double tStep)
     massbal_updateRunoffTotals(RUNOFF_EVAP, Vevap);
     massbal_updateRunoffTotals(RUNOFF_INFIL, Vinfil+VlidInfil);
     massbal_updateRunoffTotals(RUNOFF_RUNOFF, vOutflow);
+	//
+	if (netPrecip[0] > 0)
+		runofftvgm = getRunoffTVGM(j,0, netPrecip[0], evapRate, tStep);
 
     // --- return area-averaged runoff (ft/s)
     return runoff / area;
 }
 
+//=============================================================================
+
+double getRunoffTVGM(int j, int i, double precip, double evap,
+	double tStep)
+{
+	//Purpose: Finds runoff on a subcatchment using TVGM.
+	//
+	//output: runoff
+	// --- no runoff if no area
+	double    tRunoff;                 // time over which runoff occurs (sec)
+	double    surfMoisture;            // surface water available (ft/sec)
+	double    surfEvap;                // evap. used for surface water (ft/sec)
+	double    infil = 0.0;             // infiltration rate (ft/sec)
+	double    runoff = 0.0;            // runoff rate (ft/sec)
+	TSubarea* subarea;                 // pointer to subarea being analyzed
+
+	//  ---迭代
+	int k;           // 迭代次数
+	double WuB = 0;
+	double Rs1;
+	double MyErr;
+	double Fx;
+	double Fx1;
+	double x, x1;
+	double Rs = 0;
+	double Maxtime = 1000; //最大迭代次数
+	double MaxERR = 0.01;  //最大误差
+	double g1 = 0.5;
+	double g2 = 0.8;
+	double kr = 0.001;
+	double roff;
+
+	// --- assign pointer to current subarea
+	subarea = &Subcatch[j].subArea[i];
+	// --- assume runoff occurs over entire time step
+	tRunoff = tStep;
+	x = Subcatch[j].oldW;
+	double Wu = Subcatch[j].Wu;
+	MyErr = 1000; k = 0;
+	while ((k < Maxtime) && (abs(MyErr) > MaxERR))
+	{
+
+		Rs = precip * g1 * pow(x / Wu, g2);
+		Rs1 = precip * g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
+		if (x > Wu)
+		{
+			Fx = (precip - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
+			Fx1 = 1/tRunoff - 0.5 * kr  - Rs1;
+		}
+		else
+		{
+			Fx = (precip - evap) - Rs + (x - Wu) / tRunoff;
+			Fx1 = 1 / tRunoff - Rs1;
+		}
+		x1 = x - Fx / Fx1;
+		MyErr = x1 - x;
+		k++;
+		x = x1;
+	}
+	roff = Subcatch[j].subArea[i].alpha * pow(Rs,5/3) ;
+
+	Subcatch[j].newW = x;
+	return roff;
+	
+}
 //=============================================================================
 
 void getNetPrecip(int j, double* netPrecip, double tStep)
