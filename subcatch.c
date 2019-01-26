@@ -817,7 +817,6 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 		x = x1;
 	}
 	roff = Subcatch[j].subArea[i].alpha * pow(Rs,5/3) ;
-
 	Subcatch[j].newW = x;
 	return roff;
 	
