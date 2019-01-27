@@ -209,7 +209,7 @@ int  main(int argc, char *argv[])
         else if ( Warnings    ) writecon(FMT04);                               //(5.1.011)
         else                    writecon(FMT05);
     }
-
+//
 // --- Use the code below if you need to keep the console window visible
 /* 
     writecon("    Press Enter to continue...");
