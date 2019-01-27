@@ -215,7 +215,7 @@ int  main(int argc, char *argv[])
     writecon("    Press Enter to continue...");
     getchar();
 */
-	system("pause");
+
     return 0;
 }                                      /* End of main */
 #endif
