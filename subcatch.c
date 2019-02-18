@@ -799,16 +799,16 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	while ((k < Maxtime) && (abs(MyErr) > MaxERR))
 	{
 
-		Rs = precip*43200 * g1 * pow(x / Wu, g2);
-		Rs1 = precip * 43200 * g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
+		Rs = precip* g1 * pow(x / Wu, g2);
+		Rs1 = precip *  g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
 		if (x > Wu)
 		{
-			Fx = (precip* 43200 - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
+			Fx = (precip - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
 			Fx1 = 1/tRunoff - 0.5 * kr  - Rs1;
 		}
 		else
 		{
-			Fx = (precip* 43200 - evap) - Rs + (x - Wu) / tRunoff;
+			Fx = (precip - evap) - Rs + (x - Wu) / tRunoff;
 			Fx1 = 1 / tRunoff - Rs1;
 		}
 		x1 = x - Fx / Fx1;
@@ -816,6 +816,7 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 		k++;
 		x = x1;
 	}
+	Rs = Rs * 43200;
 	roff = Subcatch[j].subArea[i].alpha * pow(Rs,5/3) ;
 	Subcatch[j].newW = x;
 	return roff;
