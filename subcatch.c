@@ -754,7 +754,7 @@ double subcatch_getRunoff(int j, double tStep)
 		runofftvgm = getRunoffTVGM(j,0, netPrecip[0], evapRate, tStep);
 
     // --- return area-averaged runoff (ft/s)
-    return runoff / area;
+    return runofftvgm / area;
 }
 
 //=============================================================================
@@ -784,8 +784,8 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double Rs = 0;
 	double Maxtime = 1000; //最大迭代次数
 	double MaxERR = 0.01;  //最大误差
-	double g1 = 0.5;
-	double g2 = 0.8;
+	double g1 = 0.9;
+	double g2 = 0.5;
 	double kr = 0.001;
 	double roff;
 
@@ -799,16 +799,16 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	while ((k < Maxtime) && (abs(MyErr) > MaxERR))
 	{
 
-		Rs = precip * g1 * pow(x / Wu, g2);
-		Rs1 = precip * g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
+		Rs = precip*43200 * g1 * pow(x / Wu, g2);
+		Rs1 = precip * 43200 * g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
 		if (x > Wu)
 		{
-			Fx = (precip - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
+			Fx = (precip* 43200 - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
 			Fx1 = 1/tRunoff - 0.5 * kr  - Rs1;
 		}
 		else
 		{
-			Fx = (precip - evap) - Rs + (x - Wu) / tRunoff;
+			Fx = (precip* 43200 - evap) - Rs + (x - Wu) / tRunoff;
 			Fx1 = 1 / tRunoff - Rs1;
 		}
 		x1 = x - Fx / Fx1;
