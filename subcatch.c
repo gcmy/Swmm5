@@ -178,7 +178,7 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
     Subcatch[j].slope       = x[6] / 100.0;
     Subcatch[j].curbLength  = x[7];
 	Subcatch[j].Wu = x[8];
-	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 2 ;
+	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 3 ;
     // --- create the snow pack object if it hasn't already been created
     if ( x[9] >= 0 )
     {
@@ -701,6 +701,8 @@ double subcatch_getRunoff(int j, double tStep)
         area = nonLidArea * Subcatch[j].subArea[i].fArea;
         Subcatch[j].subArea[i].runoff =
             getSubareaRunoff(j, i, area, netPrecip[i], evapRate, tStep);
+		Subcatch[j].subArea[i].runoff = getRunoffTVGM(j, 0, netPrecip[0], evapRate, tStep);
+
         runoff += Subcatch[j].subArea[i].runoff * area;
     }
 
@@ -750,11 +752,11 @@ double subcatch_getRunoff(int j, double tStep)
     massbal_updateRunoffTotals(RUNOFF_INFIL, Vinfil+VlidInfil);
     massbal_updateRunoffTotals(RUNOFF_RUNOFF, vOutflow);
 	//
-	if (netPrecip[0] > 0)
-		runofftvgm = getRunoffTVGM(j,0, netPrecip[0], evapRate, tStep);
+	/*if (netPrecip[0] > 0)
+		runofftvgm = getRunoffTVGM(j,0, netPrecip[0], evapRate, tStep);*/
 
     // --- return area-averaged runoff (ft/s)
-    return runofftvgm / area;
+    return runoff / area;
 }
 
 //=============================================================================
@@ -784,7 +786,7 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double Rs = 0;
 	double Maxtime = 1000; //最大迭代次数
 	double MaxERR = 0.01;  //最大误差
-	double g1 = 0.9;
+	double g1 = 0.5;
 	double g2 = 0.5;
 	double kr = 0.001;
 	double roff;
@@ -816,8 +818,9 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 		k++;
 		x = x1;
 	}
-	Rs = Rs * 43200;
+	
 	roff = Subcatch[j].subArea[i].alpha * pow(Rs,5/3) ;
+	//roff = Rs;
 	Subcatch[j].newW = x;
 	return roff;
 	
