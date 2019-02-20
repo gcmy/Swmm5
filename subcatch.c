@@ -701,6 +701,7 @@ double subcatch_getRunoff(int j, double tStep)
         area = nonLidArea * Subcatch[j].subArea[i].fArea;
         Subcatch[j].subArea[i].runoff =
             getSubareaRunoff(j, i, area, netPrecip[i], evapRate, tStep);
+		//添加TVGM产流在这里似乎并不合理，应该加在更新积水的地方
 		Subcatch[j].subArea[i].runoff = getRunoffTVGM(j, 0, netPrecip[0], evapRate, tStep);
 
         runoff += Subcatch[j].subArea[i].runoff * area;
