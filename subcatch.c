@@ -1041,9 +1041,9 @@ double getSubareaRunoff(int j, int i, double area, double precip, double evap,
         updatePondedDepth(subarea, &tRunoff);
     }
 	if (i == PERV)
-	{
+	
 		subarea->depth = getRunoffTVGM(j, i, precip, surfEvap, tStep);
-	}
+	
 
     // --- compute runoff based on updated ponded depth
     runoff = findSubareaRunoff(subarea, tRunoff);
