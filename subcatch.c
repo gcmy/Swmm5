@@ -701,8 +701,7 @@ double subcatch_getRunoff(int j, double tStep)
         area = nonLidArea * Subcatch[j].subArea[i].fArea;
         Subcatch[j].subArea[i].runoff =
             getSubareaRunoff(j, i, area, netPrecip[i], evapRate, tStep);
-		//添加TVGM产流在这里似乎并不合理，应该加在更新积水的地方
-		Subcatch[j].subArea[i].runoff = getRunoffTVGM(j, 0, netPrecip[0], evapRate, tStep);
+		
 
         runoff += Subcatch[j].subArea[i].runoff * area;
     }
@@ -787,7 +786,7 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double Rs = 0;
 	double Maxtime = 1000; //最大迭代次数
 	double MaxERR = 0.01;  //最大误差
-	double g1 = 0.5;
+	double g1 = 0.9;
 	double g2 = 0.5;
 	double kr = 0.001;
 	double roff;
@@ -819,11 +818,8 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 		k++;
 		x = x1;
 	}
-	
-	roff = Subcatch[j].subArea[i].alpha * pow(Rs,5/3) ;
-	//roff = Rs;
 	Subcatch[j].newW = x;
-	return roff;
+	return Rs;
 	
 }
 //=============================================================================
@@ -1044,6 +1040,10 @@ double getSubareaRunoff(int j, int i, double area, double precip, double evap,
         subarea->inflow -= surfEvap + infil;
         updatePondedDepth(subarea, &tRunoff);
     }
+	if (i == PERV)
+	{
+		subarea->depth = getRunoffTVGM(j, i, precip, surfEvap, tStep);
+	}
 
     // --- compute runoff based on updated ponded depth
     runoff = findSubareaRunoff(subarea, tRunoff);
