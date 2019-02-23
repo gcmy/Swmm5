@@ -406,6 +406,8 @@ typedef struct
    double        Wu;              // 子流域蓄水容量
    double        newW;			  // 子流域此时刻容量
    double        oldW;			  // 子流域前一时刻容量   
+   double        g1;              //TVGM产流参数g1
+   double        g2;              //TVGM产流参数g2
 }  TSubcatch;
 
 

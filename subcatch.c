@@ -129,10 +129,10 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 {
     int    i, k, m;
     char*  id;
-    double x[10];
+    double x[12];
 
     // --- check for enough tokens
-    if ( ntoks < 8 ) return error_setInpError(ERR_ITEMS, "");
+    if ( ntoks < 11 ) return error_setInpError(ERR_ITEMS, "");
 
     // --- check that named subcatch exists
     id = project_findID(SUBCATCH, tok[0]);
@@ -152,19 +152,19 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
         return error_setInpError(ERR_NAME, tok[2]);
 
     // --- read area, %imperv, width, slope, & curb length
-    for ( i = 3; i < 9; i++)
+    for ( i = 3; i < 11; i++)
     {
         if ( ! getDouble(tok[i], &x[i]) || x[i] < 0.0 )
             return error_setInpError(ERR_NUMBER, tok[i]);
     }
 
     // --- if snowmelt object named, check that it exists
-    x[9] = -1;
-    if ( ntoks > 9 )
+    x[11] = -1;
+    if ( ntoks > 11 )
     {
-        k = project_findObject(SNOWMELT, tok[9]);
-        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[9]);
-        x[9] = k;
+        k = project_findObject(SNOWMELT, tok[11]);
+        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[11]);
+        x[11] = k;
     }
 
     // --- assign input values to subcatch's properties
@@ -179,10 +179,12 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
     Subcatch[j].curbLength  = x[7];
 	Subcatch[j].Wu = x[8];
 	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 3 ;
+	Subcatch[j].g1 = x[9];
+	Subcatch[j].g2 = x[10];
     // --- create the snow pack object if it hasn't already been created
-    if ( x[9] >= 0 )
+    if ( x[11] >= 0 )
     {
-        if ( !snow_createSnowpack(j, (int)x[8]) )
+        if ( !snow_createSnowpack(j, (int)x[11]) )
             return error_setInpError(ERR_MEMORY, "");
     }
     return 0;
@@ -786,17 +788,17 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double Rs = 0;
 	double Maxtime = 1000; //最大迭代次数
 	double MaxERR = 0.01;  //最大误差
-	double g1 = 0.9;
-	double g2 = 0.5;
 	double kr = 0.001;
 	double roff;
-
+	
 	// --- assign pointer to current subarea
 	subarea = &Subcatch[j].subArea[i];
 	// --- assume runoff occurs over entire time step
 	tRunoff = tStep;
 	x = Subcatch[j].oldW;
 	double Wu = Subcatch[j].Wu;
+	double g1= Subcatch[j].g1;
+	double g2 = Subcatch[j].g2;
 	MyErr = 1000; k = 0;
 	while ((k < Maxtime) && (abs(MyErr) > MaxERR))
 	{
