@@ -789,7 +789,7 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double Maxtime = 1000; //最大迭代次数
 	double MaxERR = 0.01;  //最大误差
 	double kr = 0.001;
-	double roff;
+
 	
 	// --- assign pointer to current subarea
 	subarea = &Subcatch[j].subArea[i];
@@ -1043,8 +1043,12 @@ double getSubareaRunoff(int j, int i, double area, double precip, double evap,
         updatePondedDepth(subarea, &tRunoff);
     }
 	if (i == PERV)
-	
+	{
 		subarea->depth = getRunoffTVGM(j, i, precip, surfEvap, tStep);
+		infil = subarea->inflow - surfEvap - subarea->depth;
+		Vinfil += infil * area * tStep;
+	}
+		
 	
 
     // --- compute runoff based on updated ponded depth
