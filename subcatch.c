@@ -129,10 +129,10 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 {
     int    i, k, m;
     char*  id;
-    double x[12];
+    double x[13];
 
     // --- check for enough tokens
-    if ( ntoks < 11 ) return error_setInpError(ERR_ITEMS, "");
+    if ( ntoks < 12 ) return error_setInpError(ERR_ITEMS, "");
 
     // --- check that named subcatch exists
     id = project_findID(SUBCATCH, tok[0]);
@@ -152,19 +152,19 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
         return error_setInpError(ERR_NAME, tok[2]);
 
     // --- read area, %imperv, width, slope, & curb length
-    for ( i = 3; i < 11; i++)
+    for ( i = 3; i < 12; i++)
     {
         if ( ! getDouble(tok[i], &x[i]) || x[i] < 0.0 )
             return error_setInpError(ERR_NUMBER, tok[i]);
     }
 
     // --- if snowmelt object named, check that it exists
-    x[11] = -1;
-    if ( ntoks > 11 )
+    x[12] = -1;
+    if ( ntoks > 12 )
     {
-        k = project_findObject(SNOWMELT, tok[11]);
-        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[11]);
-        x[11] = k;
+        k = project_findObject(SNOWMELT, tok[12]);
+        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[12]);
+        x[12] = k;
     }
 
     // --- assign input values to subcatch's properties
@@ -181,8 +181,9 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 3 ;
 	Subcatch[j].g1 = x[9];
 	Subcatch[j].g2 = x[10];
+	Subcatch[j].g3 = x[11];
     // --- create the snow pack object if it hasn't already been created
-    if ( x[11] >= 0 )
+    if ( x[12] >= 0 )
     {
         if ( !snow_createSnowpack(j, (int)x[11]) )
             return error_setInpError(ERR_MEMORY, "");
@@ -799,12 +800,14 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double Wu = Subcatch[j].Wu;
 	double g1= Subcatch[j].g1;
 	double g2 = Subcatch[j].g2;
+	double g3 = Subcatch[j].g3;
+	double TP = 10.0;   //对雨强进行归一化处理
 	MyErr = 1000; k = 0;
 	while ((k < Maxtime) && (abs(MyErr) > MaxERR))
 	{
 
-		Rs = precip* g1 * pow(x / Wu, g2);
-		Rs1 = precip *  g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
+		Rs = precip* g1 * pow(x / Wu, g2)*pow(precip/(TP/ UCF(RAINFALL)),g3);
+		Rs1 = precip *  g1 * g2 * pow(x / Wu, g2 - 1) / Wu*pow(precip / (TP / UCF(RAINFALL)), g3);
 		if (x > Wu)
 		{
 			Fx = (precip - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
