@@ -1001,6 +1001,7 @@ double getSubareaRunoff(int j, int i, double area, double precip, double evap,
     double    surfEvap;                // evap. used for surface water (ft/sec)
     double    infil = 0.0;             // infiltration rate (ft/sec)
     double    runoff = 0.0;            // runoff rate (ft/sec)
+	double  Rs = 0.0;                   //TVGM产流返回的值
     TSubarea* subarea;                 // pointer to subarea being analyzed
 
     // --- no runoff if no area
@@ -1030,26 +1031,28 @@ double getSubareaRunoff(int j, int i, double area, double precip, double evap,
     //Vinfil += infil * area * tStep;
 
     // --- if losses exceed available moisture then no ponded water remains
-    if ( surfEvap + infil >= surfMoisture )
-    {
-        subarea->depth = 0.0;
-    }
+	if (i == IMPERV0 || i == IMPERV1)
+	{
+		if (surfEvap + infil >= surfMoisture)
+		{
+			subarea->depth = 0.0;
+		}
 
-    // --- otherwise reduce inflow by losses and update depth
-    //     of ponded water and time over which runoff occurs
-    else
-    {
-        subarea->inflow -= surfEvap + infil;
-        updatePondedDepth(subarea, &tRunoff);
-    }
+		// --- otherwise reduce inflow by losses and update depth
+		//     of ponded water and time over which runoff occurs
+		else
+		{
+			subarea->inflow -= surfEvap + infil;
+			updatePondedDepth(subarea, &tRunoff);
+		}
+	}
 	if (i == PERV)
 	{
-		//能够通过这个过程改变入渗的结果，但是产流量还是没有加进去，从结构和单独跑一个过程来看是发生了变化的
-		//但是不知道为什么最后生成的结果仅仅只是不透水区域的产流值。
-		subarea->depth = getRunoffTVGM(j, i, precip, surfEvap, tStep);
-	
-		infil = subarea->inflow - surfEvap - subarea->depth;
-		Vinfil += infil * area * tStep;
+			Rs = getRunoffTVGM(j, i, precip, surfEvap, tStep);
+			infil = subarea->inflow - surfEvap - Rs;
+			subarea->inflow = Rs;
+		    Vinfil += infil * area * tStep;
+		   updatePondedDepth(subarea, &tRunoff);
 	}
 		
 	
