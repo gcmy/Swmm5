@@ -112,6 +112,8 @@ static void   updatePondedDepth(TSubarea* subarea, double* tx);
 static void   getDdDt(double t, double* d, double* dddt);
 static double getRunoffTVGM(int j,int i, double precip, double evap,
 	double tStep);
+static double getRunoffTVGM_1(int j, int i, double precip, double evap,
+	double tStep);
 
 //=============================================================================
 
@@ -179,6 +181,7 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
     Subcatch[j].curbLength  = x[7];
 	Subcatch[j].Wu = x[8];
 	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 3 ;
+	Subcatch[j].newW = Subcatch[j].Wu * 1 / 3;
 	Subcatch[j].g1 = x[9];
 	Subcatch[j].g2 = x[10];
 	Subcatch[j].g3 = x[11];
@@ -803,15 +806,24 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	double g3 = Subcatch[j].g3;
 	double TP = 10.0;   //对雨强进行归一化处理
 	MyErr = 1000; k = 0;
+	//不理解为什么要迭代，如果我直接用水量平衡公式得下一个时刻的土湿不也是可以的？
+	double newW = 0.0;
+	Rs = precip* g1 * pow(x / Wu, g2);
+	newW = ((precip - evap) - Rs + x/ UCF(RAINFALL))*UCF(RAINFALL);
+	
 	while ((k < Maxtime) && (abs(MyErr) > MaxERR))
 	{
 
-		Rs = precip* g1 * pow(x / Wu, g2)*pow(precip/(TP/ UCF(RAINFALL)),g3);
-		Rs1 = precip *  g1 * g2 * pow(x / Wu, g2 - 1) / Wu*pow(precip / (TP / UCF(RAINFALL)), g3);
+		//考虑雨强
+		/*Rs = precip* g1 * pow(x / Wu, g2)*pow(precip/(TP/ UCF(RAINFALL)),g3);
+		Rs1 = precip *  g1 * g2 * pow(x / Wu, g2 - 1) / Wu*pow(precip / (TP / UCF(RAINFALL)), g3);*/
+		//不考虑雨强
+		Rs = precip* g1 * pow(x / Wu, g2);
+		Rs1 = precip *  g1 * g2 * pow(x / Wu, g2 - 1) / Wu;
 		if (x > Wu)
 		{
-			Fx = (precip - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/tRunoff;
-			Fx1 = 1/tRunoff - 0.5 * kr  - Rs1;
+			Fx = (precip - evap) - Rs - (x + Subcatch[j].oldW) / 2 * kr  + (x - Wu)/ tRunoff;
+			Fx1 = 1/ tRunoff - 0.5 * kr  - Rs1;
 		}
 		else
 		{
@@ -823,9 +835,57 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 		k++;
 		x = x1;
 	}
+
+
+
 	Subcatch[j].newW = x;
 	return Rs;
 	
+}
+
+double getRunoffTVGM_1(int j, int i, double precip, double evap,
+	double tStep)
+{
+	//Purpose: Finds runoff on a subcatchment using TVGM.
+	//
+	//output: runoff
+	// --- no runoff if no area
+	double    tRunoff;                 // time over which runoff occurs (sec)
+	double    surfMoisture;            // surface water available (ft/sec)
+	double    surfEvap;                // evap. used for surface water (ft/sec)
+	double    infil = 0.0;             // infiltration rate (ft/sec)
+	double    runoff = 0.0;            // runoff rate (ft/sec)
+	TSubarea* subarea;                 // pointer to subarea being analyzed
+
+									   //  ---迭代
+
+	double x;
+	double Rs = 0;
+	double G = 0.0;
+
+	// --- assign pointer to current subarea
+	subarea = &Subcatch[j].subArea[i];
+	// --- assume runoff occurs over entire time step
+
+	x = Subcatch[j].oldW;
+	double Wu = Subcatch[j].Wu;
+	double g1 = Subcatch[j].g1;
+	double g2 = Subcatch[j].g2;
+	double g3 = Subcatch[j].g2;
+	double TP = 2.0;   //对雨强进行归一化处理
+
+
+	double newW = 0.0;
+	if (Subcatch[j].newW != Subcatch[j].oldW)
+		x = Subcatch[j].newW;
+	G = g1 * pow(x / Wu, g2)*pow(precip / (TP / UCF(RAINFALL)), g3);
+	if (G > 1.0) G = 1.0;
+	Rs = (precip-evap)* G;
+	newW = ((precip - evap) - Rs + x / UCF(RAINFALL))*UCF(RAINFALL);
+	if (newW > Wu) newW = Wu;
+	Subcatch[j].newW = newW;
+	return Rs;
+
 }
 //=============================================================================
 
@@ -1051,7 +1111,7 @@ double getSubareaRunoff(int j, int i, double area, double precip, double evap,
 	}
 	if (i == PERV)
 	{
-			Rs = getRunoffTVGM(j, i, precip, surfEvap, tStep);
+			Rs = getRunoffTVGM_1(j, i, precip, surfEvap, tStep);
 			infil = subarea->inflow - surfEvap - Rs;
 			subarea->inflow = Rs;
 		    Vinfil += infil * area * tStep;
