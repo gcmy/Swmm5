@@ -131,10 +131,10 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 {
     int    i, k, m;
     char*  id;
-    double x[13];
+    double x[14];
 
     // --- check for enough tokens
-    if ( ntoks < 12 ) return error_setInpError(ERR_ITEMS, "");
+    if ( ntoks < 13 ) return error_setInpError(ERR_ITEMS, "");
 
     // --- check that named subcatch exists
     id = project_findID(SUBCATCH, tok[0]);
@@ -154,19 +154,19 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
         return error_setInpError(ERR_NAME, tok[2]);
 
     // --- read area, %imperv, width, slope, & curb length
-    for ( i = 3; i < 12; i++)
+    for ( i = 3; i < 13; i++)
     {
         if ( ! getDouble(tok[i], &x[i]) || x[i] < 0.0 )
             return error_setInpError(ERR_NUMBER, tok[i]);
     }
 
     // --- if snowmelt object named, check that it exists
-    x[12] = -1;
-    if ( ntoks > 12 )
+    x[13] = -1;
+    if ( ntoks > 13 )
     {
-        k = project_findObject(SNOWMELT, tok[12]);
-        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[12]);
-        x[12] = k;
+        k = project_findObject(SNOWMELT, tok[13]);
+        if ( k < 0 ) return error_setInpError(ERR_NAME, tok[13]);
+        x[13] = k;
     }
 
     // --- assign input values to subcatch's properties
@@ -185,6 +185,7 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 	Subcatch[j].g1 = x[9];
 	Subcatch[j].g2 = x[10];
 	Subcatch[j].g3 = x[11];
+	Subcatch[j].TP = x[12];
     // --- create the snow pack object if it hasn't already been created
     if ( x[12] >= 0 )
     {
@@ -871,8 +872,8 @@ double getRunoffTVGM_1(int j, int i, double precip, double evap,
 	double Wu = Subcatch[j].Wu;
 	double g1 = Subcatch[j].g1;
 	double g2 = Subcatch[j].g2;
-	double g3 = Subcatch[j].g2;
-	double TP = 2.0;   //对雨强进行归一化处理
+	double g3 = Subcatch[j].g3;
+	double TP = Subcatch[j].TP;  
 
 
 	double newW = 0.0;
@@ -880,7 +881,9 @@ double getRunoffTVGM_1(int j, int i, double precip, double evap,
 		x = Subcatch[j].newW;
 	G = g1 * pow(x / Wu, g2)*pow(precip / (TP / UCF(RAINFALL)), g3);
 	if (G > 1.0) G = 1.0;
-	Rs = (precip-evap)* G;
+	Rs = precip* G;
+	if (Rs + evap > precip)
+		Rs = precip - evap;
 	newW = ((precip - evap) - Rs + x / UCF(RAINFALL))*UCF(RAINFALL);
 	if (newW > Wu) newW = Wu;
 	Subcatch[j].newW = newW;

@@ -409,6 +409,7 @@ typedef struct
    double        g1;              //TVGM产流参数g1
    double        g2;              //TVGM产流参数g2
    double        g3;              //TVGM产流参数g2
+   double       TP;               //雨强归一化参数
 }  TSubcatch;
 
 
