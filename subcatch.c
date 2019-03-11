@@ -759,10 +759,7 @@ double subcatch_getRunoff(int j, double tStep)
     massbal_updateRunoffTotals(RUNOFF_INFIL, Vinfil+VlidInfil);
     massbal_updateRunoffTotals(RUNOFF_RUNOFF, vOutflow);
 	//
-	/*if (netPrecip[0] > 0)
-		runofftvgm = getRunoffTVGM(j,0, netPrecip[0], evapRate, tStep);*/
 
-    // --- return area-averaged runoff (ft/s)
     return runoff / area;
 }
 
@@ -776,7 +773,6 @@ double getRunoffTVGM(int j, int i, double precip, double evap,
 	//output: runoff
 	// --- no runoff if no area
 	double    tRunoff;                 // time over which runoff occurs (sec)
-	double    surfMoisture;            // surface water available (ft/sec)
 	double    surfEvap;                // evap. used for surface water (ft/sec)
 	double    infil = 0.0;             // infiltration rate (ft/sec)
 	double    runoff = 0.0;            // runoff rate (ft/sec)
@@ -863,10 +859,14 @@ double getRunoffTVGM_1(int j, int i, double precip, double evap,
 	double x;
 	double Rs = 0;
 	double G = 0.0;
-
+	double theta = 0.0;
+	double porosity = 0.0;
 	// --- assign pointer to current subarea
 	subarea = &Subcatch[j].subArea[i];
 	// --- assume runoff occurs over entire time step
+	
+
+	
 
 	x = Subcatch[j].oldW;
 	double Wu = Subcatch[j].Wu;
@@ -875,18 +875,34 @@ double getRunoffTVGM_1(int j, int i, double precip, double evap,
 	double g3 = Subcatch[j].g3;
 	double TP = Subcatch[j].TP;  
 
+	if (!IgnoreGwater && Subcatch[j].groundwater)
+	{
+		//调用地表土壤湿度；
+		theta = Get_gw_theta(j);
+		//调用土壤孔隙度，即相当于饱和土壤含水量；
+		porosity = Get_porosity(j);
 
-	double newW = 0.0;
-	if (Subcatch[j].newW != Subcatch[j].oldW)
-		x = Subcatch[j].newW;
-	G = g1 * pow(x / Wu, g2)*pow(precip / (TP / UCF(RAINFALL)), g3);
-	if (G > 1.0) G = 1.0;
-	Rs = precip* G;
-	if (Rs + evap > precip)
-		Rs = precip - evap;
-	newW = ((precip - evap) - Rs + x / UCF(RAINFALL))*UCF(RAINFALL);
-	if (newW > Wu) newW = Wu;
-	Subcatch[j].newW = newW;
+		G = g1 * pow(theta / porosity, g2)*pow(precip / (TP / UCF(RAINFALL)), g3);
+		if (G > 1.0) G = 1.0;
+		Rs = precip* G;
+		if (Rs + evap > precip)
+			Rs = precip - evap;
+	}
+	else 
+	{
+		double newW = 0.0;
+		if (Subcatch[j].newW != Subcatch[j].oldW)
+			x = Subcatch[j].newW;
+		G = g1 * pow(x / Wu, g2)*pow(precip / (TP / UCF(RAINFALL)), g3);
+		if (G > 1.0) G = 1.0;
+		Rs = precip* G;
+		if (Rs + evap > precip)
+			Rs = precip - evap;
+		newW = ((precip - evap) - Rs + x / UCF(RAINFALL))*UCF(RAINFALL);
+		if (newW > Wu) newW = Wu;
+		Subcatch[j].newW = newW;
+	}
+	
 	return Rs;
 
 }

@@ -426,6 +426,27 @@ void  gwater_initState(int j)
     }
 }
 
+//读取地表土壤湿度
+double Get_gw_theta(int j)
+{
+	TGroundwater* gw = Subcatch[j].groundwater;
+	
+	double moisture = 0.0;
+	moisture = gw->theta;
+		return moisture;
+}
+double Get_porosity(int j)
+{
+	TAquifer a;         // Aquifer data structure
+	TGroundwater* gw;   // Groundwater data structure
+
+	gw = Subcatch[j].groundwater; 
+	a = Aquifer[gw->aquifer];
+
+	double Wsat = 0.0;
+	Wsat = a.porosity;
+	return Wsat;
+}
 //=============================================================================
 
 void gwater_getState(int j, double x[])

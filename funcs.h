@@ -172,6 +172,10 @@ void    gwater_getGroundwater(int subcatch, double evap, double infil,
         double tStep);
 double  gwater_getVolume(int subcatch);
 
+//声明我写入的读取地表土壤湿度的函数
+double Get_gw_theta(int subcatch);
+//声明我写入的读取土壤孔隙度即土壤饱和含水量的函数
+double Get_porosity(int subcatch);
 //-----------------------------------------------------------------------------
 //   RDII Methods
 //-----------------------------------------------------------------------------
