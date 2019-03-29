@@ -105,6 +105,12 @@
                                        //   callable from other programs
 #define  MAX_EXCEPTIONS 100            // max. number of exceptions handled
 
+struct Gene
+{
+	double canshu[3];
+	double shiyingdu;
+};
+
 //-----------------------------------------------------------------------------
 //  Unit conversion factors
 //-----------------------------------------------------------------------------
@@ -135,6 +141,10 @@ static int  ExceptionCount;       // number of exceptions handled
 static int  DoRunoff;             // TRUE if runoff is computed
 static int  DoRouting;            // TRUE if flow routing is computed
 
+
+double min[5] = { 20, 0.1, 0.5, 0.01,0.5 };
+double max[5] = { 100,1,1,0.1,1 };
+int daishu = 10;
 //-----------------------------------------------------------------------------
 //  External functions (prototyped in swmm5.h)
 //-----------------------------------------------------------------------------
@@ -157,10 +167,13 @@ static void execRouting(void);                                                 /
 #ifdef EXH                                                                     //(5.1.011)
 static int  xfilter(int xc, char* module, double elapsedTime, long step);      //(5.1.011)
 #endif
-
 //-----------------------------------------------------------------------------
 //  Entry point used to compile a stand-alone executable.
 //-----------------------------------------------------------------------------
+void initpoop(struct Gene geti[], double min[], double max[], double outflow[], double var);
+void mutation(struct Gene geti[], double min[], double max[], double outflow[], double var);
+void generation(struct Gene geti[], double min[], double max[], double outflow[], double var);
+double var(double flow[], int Number);
 #ifdef CLE 
 int  main(int argc, char *argv[])
 //
@@ -185,7 +198,6 @@ int  main(int argc, char *argv[])
     IsOpenFlag = FALSE;
     IsStartedFlag = FALSE;
     SaveResultsFlag = TRUE;
-
     // --- check for proper number of command line arguments
     start = time(0);
     if (argc < 3) writecon(FMT01);
@@ -196,14 +208,14 @@ int  main(int argc, char *argv[])
         reportFile = argv[2];
         if (argc > 3) binaryFile = argv[3];
         else          binaryFile = blank;
-        writecon(FMT02);
+        //writecon(FMT02);
 
         // --- run SWMM
-        swmm_run(inputFile, reportFile, binaryFile);
+        swmm_run1(inputFile, reportFile, binaryFile);
 
         // Display closing status on console
-        runTime = difftime(time(0), start);
-        sprintf(Msg, "\n\n... EPA-SWMM completed in %.2f seconds.", runTime);
+        //runTime = difftime(time(0), start);
+        //sprintf(Msg, "\n\n... EPA-SWMM completed in %.2f seconds.", runTime);
         writecon(Msg);
         if      ( ErrorCode   ) writecon(FMT03);
         else if ( Warnings    ) writecon(FMT04);                               //(5.1.011)
@@ -222,63 +234,63 @@ int  main(int argc, char *argv[])
 
 //=============================================================================
 
-int DLLEXPORT  swmm_run(char* f1, char* f2, char* f3)
+//int DLLEXPORT  swmm_run(char* f1, char* f2, char* f3)
+////
+////  Input:   f1 = name of input file
+////           f2 = name of report file
+////           f3 = name of binary output file
+////  Output:  returns error code
+////  Purpose: runs a SWMM simulation.
+////
+//{
+//    long newHour, oldHour = 0;
+//    long theDay, theHour;
+//    double elapsedTime = 0.0;                                                  //(5.1.011)
 //
-//  Input:   f1 = name of input file
-//           f2 = name of report file
-//           f3 = name of binary output file
-//  Output:  returns error code
-//  Purpose: runs a SWMM simulation.
+//    // --- open the files & read input data
+//    ErrorCode = 0;
+//    swmm_open(f1, f2, f3);
 //
-{
-    long newHour, oldHour = 0;
-    long theDay, theHour;
-    double elapsedTime = 0.0;                                                  //(5.1.011)
-
-    // --- open the files & read input data
-    ErrorCode = 0;
-    swmm_open(f1, f2, f3);
-
-    // --- run the simulation if input data OK
-    if ( !ErrorCode )
-    {
-        // --- initialize values
-        swmm_start(TRUE);
-
-        // --- execute each time step until elapsed time is re-set to 0
-        if ( !ErrorCode )
-        {
-            writecon("\n o  Simulating day: 0     hour:  0");
-            do
-            {
-                swmm_step(&elapsedTime);
-                newHour = (long)(elapsedTime * 24.0);
-                if ( newHour > oldHour )
-                {
-                    theDay = (long)elapsedTime;
-                    theHour = (long)((elapsedTime - floor(elapsedTime)) * 24.0);
-                    writecon("\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
-                    sprintf(Msg, "%-5d hour: %-2d", theDay, theHour);
-                    writecon(Msg);
-                    oldHour = newHour;
-                }
-            } while ( elapsedTime > 0.0 && !ErrorCode );
-            writecon("\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
-                     "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
-            writecon("Simulation complete           ");
-        }
-
-        // --- clean up
-        swmm_end();
-    }
-
-    // --- report results
-    if ( Fout.mode == SCRATCH_FILE ) swmm_report();
-
-    // --- close the system
-    swmm_close();
-    return error_getCode(ErrorCode);                                           //(5.1.011)
-}
+//    // --- run the simulation if input data OK
+//    if ( !ErrorCode )
+//    {
+//        // --- initialize values
+//        swmm_start(TRUE);
+//
+//        // --- execute each time step until elapsed time is re-set to 0
+//        if ( !ErrorCode )
+//        {
+//           // writecon("\n o  Simulating day: 0     hour:  0");
+//            do
+//            {
+//                swmm_step(&elapsedTime);
+//                newHour = (long)(elapsedTime * 24.0);
+//                if ( newHour > oldHour )
+//                {
+//                    theDay = (long)elapsedTime;
+//                    theHour = (long)((elapsedTime - floor(elapsedTime)) * 24.0);
+//                    //writecon("\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+//                    //sprintf(Msg, "%-5d hour: %-2d", theDay, theHour);
+//                    //writecon(Msg);
+//                    oldHour = newHour;
+//                }
+//            } while ( elapsedTime > 0.0 && !ErrorCode );
+//            //writecon("\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+//                    // "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+//            writecon("Simulation complete           ");
+//        }
+//
+//        // --- clean up
+//        swmm_end();
+//    }
+//
+//    // --- report results
+//    if ( Fout.mode == SCRATCH_FILE ) swmm_report();
+//
+//    // --- close the system
+//    swmm_close();
+//    return error_getCode(ErrorCode);                                           //(5.1.011)
+//}
 
 //=============================================================================
 
@@ -942,4 +954,79 @@ int xfilter(int xc, char* module, double elapsedTime, long step)               /
 #endif
 
 //=============================================================================
-    
+void swmm_process(struct Gene geti)
+{
+	//
+	//  Input:  geti 是指每一个个体的结构体
+	//  Output: 进行swmm过程计算出流
+	//  Purpose: exception filtering routine for operating system exceptions
+	//           under Windows and the Microsoft C compiler.
+	long newHour, oldHour = 0;
+	long theDay, theHour;
+	double elapsedTime = 0.0;
+	Tvgm_cs.Wu = geti.canshu[0];
+	Tvgm_cs.g1 = geti.canshu[1];
+	Tvgm_cs.g2 = geti.canshu[2];
+	Tvgm_cs.g3 = geti.canshu[3];
+	Tvgm_cs.TP = geti.canshu[4];
+	swmm_start(TRUE);
+	// --- execute each time step until elapsed time is re-set to 0
+
+	do
+	{
+
+		swmm_step(&elapsedTime);
+		newHour = (long)(elapsedTime * 24.0);
+		if (newHour > oldHour)
+		{
+			theDay = (long)elapsedTime;
+			theHour = (long)((elapsedTime - floor(elapsedTime)) * 24.0);
+			oldHour = newHour;
+		}
+	} while (elapsedTime > 0.0);
+}
+
+void fileread(char name[],double outflow[])
+{
+	FILE *fp;
+	if ((fp = fopen(name, "r+")) == NULL)
+	{
+
+		printf("此文件无法打开。\n");
+		exit(0);
+	}
+	for (int i = 0; i < 49; i++)
+	{
+		fscanf(fp, "%lf", &outflow[i]);
+	}
+	fclose(fp);
+
+}
+int   swmm_run1(char* f1, char* f2, char* f3)
+//
+//  Input:   f1 = name of input file
+//           f2 = name of report file
+//           f3 = name of binary output file
+//  Output:  returns error code
+//  Purpose: runs a SWMM simulation.
+//
+{																			   
+	swmm_open(f1, f2, f3);
+	double outflow[49];
+	int j;
+	double h = daishu;
+	struct Gene geti[50], *p1 = geti;//种群个体数
+	fileread("F:\\新建文件夹\\swmm\\outflow.txt",outflow);
+	double shice = var(outflow, 49);
+	initpoop(geti, min, max, outflow, shice);
+	for (j = 0; j < daishu; j++)
+	{
+		generation(geti, min, max, outflow, shice);//交叉操作
+		mutation(geti, min, max, outflow, shice);//变异操作
+
+	}
+
+	
+	
+
+}

@@ -1089,3 +1089,11 @@ typedef struct
    char          Enabled;         // TRUE if appears in report table
    int           Precision;       // number of decimal places when reported
 }  TRptField;
+typedef struct
+{
+	double          Wu;        // name of reported variable 
+	double          g1;      // units of reported variable
+	double          g2;         // TRUE if appears in report table
+	double          g3;       // number of decimal places when reported
+	double          TP;
+}  TVGM;

@@ -159,3 +159,4 @@ EXTERN TTable*    Tseries;                  // Array of time series tables
 EXTERN TTransect* Transect;                 // Array of transect data
 EXTERN TShape*    Shape;                    // Array of custom conduit shapes
 EXTERN TEvent*    Event;                    // Array of routing events         //(5.1.011)
+EXTERN TVGM Tvgm_cs;                        // TVGM²ÎÊý

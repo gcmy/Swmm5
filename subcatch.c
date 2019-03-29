@@ -869,11 +869,16 @@ double getRunoffTVGM_1(int j, int i, double precip, double evap,
 	
 
 	x = Subcatch[j].oldW;
-	double Wu = Subcatch[j].Wu;
-	double g1 = Subcatch[j].g1;
-	double g2 = Subcatch[j].g2;
-	double g3 = Subcatch[j].g3;
-	double TP = Subcatch[j].TP;  
+	//double Wu = Subcatch[j].Wu;
+	//double g1 = Subcatch[j].g1;
+	//double g2 = Subcatch[j].g2;
+	//double g3 = Subcatch[j].g3;
+	//double TP = Subcatch[j].TP;  
+	double Wu = Tvgm_cs.Wu;
+	double g1 = Tvgm_cs.g1;
+	double g2 = Tvgm_cs.g2;
+	double g3 = Tvgm_cs.g3;
+	double TP = Tvgm_cs.TP;
 
 	if (!IgnoreGwater && Subcatch[j].groundwater)
 	{

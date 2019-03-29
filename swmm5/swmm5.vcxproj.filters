@@ -53,6 +53,10 @@
     <ClCompile Include="..\transect.c" />
     <ClCompile Include="..\treatmnt.c" />
     <ClCompile Include="..\xsect.c" />
+    <ClCompile Include="..\objfunc.c" />
+    <ClCompile Include="..\generation.c" />
+    <ClCompile Include="..\initoop.c" />
+    <ClCompile Include="..\mutation.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\consts.h" />

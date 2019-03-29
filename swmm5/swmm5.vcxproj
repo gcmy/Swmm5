@@ -31,12 +31,14 @@
     <ClCompile Include="..\flowrout.c" />
     <ClCompile Include="..\forcmain.c" />
     <ClCompile Include="..\gage.c" />
+    <ClCompile Include="..\generation.c" />
     <ClCompile Include="..\gwater.c" />
     <ClCompile Include="..\hash.c" />
     <ClCompile Include="..\hotstart.c" />
     <ClCompile Include="..\iface.c" />
     <ClCompile Include="..\infil.c" />
     <ClCompile Include="..\inflow.c" />
+    <ClCompile Include="..\initoop.c" />
     <ClCompile Include="..\input.c" />
     <ClCompile Include="..\inputrpt.c" />
     <ClCompile Include="..\keywords.c" />
@@ -48,7 +50,9 @@
     <ClCompile Include="..\massbal.c" />
     <ClCompile Include="..\mathexpr.c" />
     <ClCompile Include="..\mempool.c" />
+    <ClCompile Include="..\mutation.c" />
     <ClCompile Include="..\node.c" />
+    <ClCompile Include="..\objfunc.c" />
     <ClCompile Include="..\odesolve.c" />
     <ClCompile Include="..\output.c" />
     <ClCompile Include="..\project.c" />
