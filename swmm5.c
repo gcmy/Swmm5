@@ -107,7 +107,7 @@
 
 struct Gene
 {
-	double canshu[3];
+	double canshu[5];
 	double shiyingdu;
 };
 
@@ -1002,7 +1002,8 @@ void fileread(char name[],double outflow[])
 	fclose(fp);
 
 }
-int   swmm_run1(char* f1, char* f2, char* f3)
+
+int  DLLEXPORT  swmm_run1(char* f1, char* f2, char* f3)
 //
 //  Input:   f1 = name of input file
 //           f2 = name of report file
@@ -1016,7 +1017,7 @@ int   swmm_run1(char* f1, char* f2, char* f3)
 	int j;
 	double h = daishu;
 	struct Gene geti[50], *p1 = geti;//种群个体数
-	fileread("F:\\新建文件夹\\swmm\\outflow.txt",outflow);
+	fileread("C:\\Users\\Zhang Yin\\Desktop\\UTVGM-SWMM\\TVGM-SWMM-GA\\20190402\\swmm5\\outflow.txt",outflow);
 	double shice = var(outflow, 49);
 	initpoop(geti, min, max, outflow, shice);
 	for (j = 0; j < daishu; j++)
@@ -1026,7 +1027,6 @@ int   swmm_run1(char* f1, char* f2, char* f3)
 
 	}
 
-	
-	
+	return error_getCode(ErrorCode);
 
 }
