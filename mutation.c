@@ -53,4 +53,5 @@ void mutation(struct Gene geti[],double min[], double max[],double outflow[],dou
 		if (fubei[i].shiyingdu>geti[i].shiyingdu)
 		geti[i] = fubei[i];
 	}
+	
 }

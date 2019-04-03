@@ -40,7 +40,7 @@ double objfunc(double outflow[],double shice)
 	/// outflow 是实际输出的流量
 	///shice为nash效应系数的分母
 	///
-
+	double wucha = 0.0;
 	for (period = 1; period <= Nperiods; period++)
 	{
 		output_readDateTime(period, &days);
