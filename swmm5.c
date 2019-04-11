@@ -387,7 +387,7 @@ int  DLLEXPORT  swmm_run1(char* f1, char* f2, char* f3)
 	}
 	swmm_process(geti[num]);
 
-	printf("\n%f \n%f \n%f \n%f \n%f\n", geti[num].canshu[0], geti[num].canshu[1], geti[num].canshu[2], geti[num].canshu[3], geti[num].canshu[4]);
+	printf("\nNES=%.3f \nWU=%d \ng1=%.3f \ng2=%.3f \ng3=%.3f \nTP=%.3f\n", geti[num].shiyingdu, (int)geti[num].canshu[0], geti[num].canshu[1], geti[num].canshu[2], geti[num].canshu[3], geti[num].canshu[4]);
 	
 	// --- report results
 	if (Fout.mode == SCRATCH_FILE) swmm_report();

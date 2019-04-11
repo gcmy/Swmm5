@@ -49,7 +49,7 @@ void mutation(struct Gene geti[],double min[], double max[],double outflow[],dou
 		}
 	}
 		swmm_process(fubei[i]);
-		fubei[i].shiyingdu = pow(1 / (1 - objfunc(outflow,var)), 2);
+		geti[i].shiyingdu = objfunc(outflow, var);
 		if (fubei[i].shiyingdu>geti[i].shiyingdu)
 		geti[i] = fubei[i];
 	}

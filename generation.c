@@ -64,7 +64,7 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 			}
 		}
 		swmm_process(geti[i]);
-		fubei[i].shiyingdu = pow(1 / (1 - objfunc(outflow,var)), 2);
+		geti[i].shiyingdu = objfunc(outflow, var);
 	}
 	for (i = 0, j = 0, k = 0, m = 0, e = fubei[i].shiyingdu; i < N; i++)//记录适应度里最小值
 	{
@@ -78,6 +78,6 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 	}
 	if (c>e)
 		fubei[m] = geti[h];//将父辈最大值替换子倍最小
-	sprintf(msg, "%f %f %f %f %f", geti[m].canshu[0], geti[m].canshu[1], geti[m].canshu[2], geti[m].canshu[3], geti[m].canshu[4]);
+	//sprintf(msg, "%f %f %f %f %f", geti[m].canshu[0], geti[m].canshu[1], geti[m].canshu[2], geti[m].canshu[3], geti[m].canshu[4]);
 
 }

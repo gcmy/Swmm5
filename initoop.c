@@ -36,21 +36,11 @@ void initpoop(struct Gene geti[], double min[], double max[], double outflow[], 
 		}
 		geti[i].shiyingdu = 0;
 		swmm_process(geti[i]);
-		dc1 = objfunc(outflow, var);
-		geti[i].shiyingdu = pow(1 / (1 - dc1 ), 2);//利用数学公式将效益系数转化为适应度函数
-		leijishiyingdu += geti[i].shiyingdu;
+
+		geti[i].shiyingdu = objfunc(outflow, var);
+	
 	}
-	for (i = 0; i < N; i++)//采用按比例适应度分配选取初始样本
-	{
-		e = random(10000);
-		b = (double)e / 10000.0;
-		for (j = 0, c = 0; j < N; j++)
-		{
-			c += geti[j].shiyingdu;
-			if (b>((c - geti[j].shiyingdu) / leijishiyingdu) && b < (c / leijishiyingdu))
-				fubei[i] = geti[j];
-		}
-	}
+	
 	for (i = 0; i < N; i++)
-		geti[i] = fubei[i];
+		fubei[i] = geti[i];
 }
