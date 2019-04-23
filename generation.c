@@ -11,14 +11,15 @@
 #define pcross 0.85
 
 double objfunc(double outflow[], double shice);
-void swmm_process(struct Gene geti);
+//void swmm_process(struct Gene geti);
+void swmm_process(struct Gene geti, char* f1, char* f2, char* f3);
 FILE  *fp1, *fp2;
 struct Gene
 {
-	double canshu[5];
+	double canshu[12];
 	double shiyingdu;
 };
-void generation(struct Gene geti[], double min[], double max[], double outflow[], double var)
+void generation(struct Gene geti[], double min[], double max[], double outflow[], double var, char* f1, char* f2, char* f3)
 {
 	char msg[100];
 	FILE *fp;
@@ -41,7 +42,7 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 		e = random(10000) / 10000.0;
 		if (e < pcross)
 		{
-			for (j = 0; j < 5; j++)
+			for (j = 0; j < 12; j++)
 			{
 				k = (int)((fubei[i].canshu[j] - min[j]) / (max[j] - min[j])*(pow(2, lchrom) - 1));
 				m = (int)((fubei[i + 1].canshu[j] - min[j]) / (max[j] - min[j])*(pow(2, lchrom) - 1));
@@ -63,7 +64,7 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 				fubei[i + 1].canshu[j] = m / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 			}
 		}
-		swmm_process(geti[i]);
+		swmm_process(geti[i],f1,f2,f3);
 		geti[i].shiyingdu = objfunc(outflow, var);
 	}
 	for (i = 0, j = 0, k = 0, m = 0, e = fubei[i].shiyingdu; i < N; i++)//记录适应度里最小值
@@ -78,6 +79,6 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 	}
 	if (c>e)
 		fubei[m] = geti[h];//将父辈最大值替换子倍最小
-	//sprintf(msg, "%f %f %f %f %f", geti[m].canshu[0], geti[m].canshu[1], geti[m].canshu[2], geti[m].canshu[3], geti[m].canshu[4]);
+
 
 }

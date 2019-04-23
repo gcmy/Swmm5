@@ -8,13 +8,13 @@
 #define LEN sizeof(struct Geti)
 #define pmutation 0.18
 double objfunc(double outflow[], double shice);
-void swmm_process(struct Gene geti);
+void swmm_process(struct Gene geti, char* f1, char* f2, char* f3);
 struct Gene
 {
-	double canshu[5];
+	double canshu[12];
 	double shiyingdu;
 };
-void mutation(struct Gene geti[],double min[], double max[],double outflow[],double var)
+void mutation(struct Gene geti[],double min[], double max[],double outflow[],double var,  char* f1, char* f2, char* f3)
 {
 	FILE *fp;
 
@@ -26,7 +26,7 @@ void mutation(struct Gene geti[],double min[], double max[],double outflow[],dou
 	for (i = 0; i < N; i++)
 	{
 		fubei[i] = geti[i];
-		for (j = 0; j < 5; j++)
+		for (j = 0; j < 12; j++)
 		{		
 		e  = random(10000) / 10000.0;
 		if (e < pmutation)
@@ -48,7 +48,7 @@ void mutation(struct Gene geti[],double min[], double max[],double outflow[],dou
 			fubei[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 		}
 	}
-		swmm_process(fubei[i]);
+		swmm_process(fubei[i],f1,f2,f3);
 		geti[i].shiyingdu = objfunc(outflow, var);
 		if (fubei[i].shiyingdu>geti[i].shiyingdu)
 		geti[i] = fubei[i];

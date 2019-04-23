@@ -313,7 +313,10 @@ void  link_setParams(int j, int type, int n1, int n2, int k, double x[])
       case CONDUIT:
         Conduit[k].length    = x[0] / UCF(LENGTH);
         Conduit[k].modLength = Conduit[k].length;
-        Conduit[k].roughness = x[1];
+        //Conduit[k].roughness = x[1];
+		
+		Conduit[k].roughness = Mannings.Rougness;
+
         Link[j].offset1      = x[2] / UCF(LENGTH);
         Link[j].offset2      = x[3] / UCF(LENGTH);
         Link[j].q0           = x[4] / UCF(FLOW);

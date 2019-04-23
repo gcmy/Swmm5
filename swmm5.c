@@ -107,7 +107,7 @@
 
 struct Gene
 {
-	double canshu[5];
+	double canshu[12];
 	double shiyingdu;
 };
 
@@ -142,9 +142,9 @@ static int  DoRunoff;             // TRUE if runoff is computed
 static int  DoRouting;            // TRUE if flow routing is computed
 
 
-double min[5] = { 20, 0, 0.5, 0.01,0.5 };
-double max[5] = { 100,1,1,1,1 };
-int daishu = 2;
+double min[12] = { 20, 0, 0.5, 0.01,0.5,0.01,0.1,0.011,0.2,2,5,0 };
+double max[12] = { 100,1,1,1,1,0.033,0.8,0.015,10,10,50,1 };
+int daishu = 1;
 const int N=50;
 //-----------------------------------------------------------------------------
 //  External functions (prototyped in swmm5.h)
@@ -175,9 +175,9 @@ static int  xfilter(int xc, char* module, double elapsedTime, long step);      /
 
 #ifdef CLE 
 
-void initpoop(struct Gene geti[], double min[], double max[], double outflow[], double var);
-void mutation(struct Gene geti[], double min[], double max[], double outflow[], double var);
-void generation(struct Gene geti[], double min[], double max[], double outflow[], double var);
+void initpoop(struct Gene geti[], double min[], double max[], double outflow[], double var, char* f1, char* f2, char* f3);
+void mutation(struct Gene geti[], double min[], double max[], double outflow[], double var, char* f1, char* f2, char* f3);
+void generation(struct Gene geti[], double min[], double max[], double outflow[], double var, char* f1, char* f2, char* f3);
 double var(double flow[], int Number);
 
 int  main(int argc, char *argv[])
@@ -298,7 +298,7 @@ int  main(int argc, char *argv[])
 //}
 
 //=============================================================================
-void swmm_process(struct Gene geti)
+void swmm_process(struct Gene geti, char* f1, char* f2, char* f3)
 {
 	//
 	//  Input:  geti 是指每一个个体的结构体
@@ -313,6 +313,14 @@ void swmm_process(struct Gene geti)
 	Tvgm_cs.g2 = geti.canshu[2];
 	Tvgm_cs.g3 = geti.canshu[3];
 	Tvgm_cs.TP = geti.canshu[4];
+	Mannings.N_Imperv = geti.canshu[5];
+	Mannings.N_Perv = geti.canshu[6];
+	Mannings.Rougness = geti.canshu[7];
+	Storages.S_Imperv = geti.canshu[8];
+	Storages.S_Perv = geti.canshu[9];
+	Storages.PctZero = geti.canshu[10];
+	Tvgm_cs.Perc = geti.canshu[11];
+	swmm_open(f1, f2, f3);
 	swmm_start(TRUE);
 	// --- execute each time step until elapsed time is re-set to 0
 
@@ -361,18 +369,18 @@ int  DLLEXPORT  swmm_run1(char* f1, char* f2, char* f3)
 //  Purpose: runs a SWMM simulation.
 //
 {
-	swmm_open(f1, f2, f3);
+	
 	double outflow[49];
 	int j;
 	double h = daishu;
 	struct Gene geti[50], *p1 = geti;//种群个体数
 	fileread("C:\\Users\\Zhang Yin\\Desktop\\UTVGM-SWMM\\TVGM-SWMM-GA\\20190402\\swmm5\\outflow.txt", outflow);
 	double shice = var(outflow, 49);
-	initpoop(geti, min, max, outflow, shice);
+	initpoop(geti, min, max, outflow, shice,f1,f2,f3);
 	for (j = 0; j < daishu; j++)
 	{
-		generation(geti, min, max, outflow, shice);//交叉操作
-		mutation(geti, min, max, outflow, shice);//变异操作
+		generation(geti, min, max, outflow, shice,f1,f2,f3);//交叉操作
+		mutation(geti, min, max, outflow, shice,f1,f2,f3);//变异操作
 	}
 	double best = geti[0].shiyingdu;
 	int num = 0;
@@ -385,9 +393,9 @@ int  DLLEXPORT  swmm_run1(char* f1, char* f2, char* f3)
 			num = perm;
 		}
 	}
-	swmm_process(geti[num]);
+	swmm_process(geti[num],f1,f2,f3);
 
-	printf("\nNES=%.3f \nWU=%d \ng1=%.3f \ng2=%.3f \ng3=%.3f \nTP=%.3f\n", geti[num].shiyingdu, (int)geti[num].canshu[0], geti[num].canshu[1], geti[num].canshu[2], geti[num].canshu[3], geti[num].canshu[4]);
+	printf("\nNES=%.3f \nWU=%d \ng1=%.3f \ng2=%.3f \ng3=%.3f \nTP=%.3f\nN-Imperv=%.3f\nN-Perv=%.3f\nRoughness=%.3f\nS-Imperv=%.3f\nS-Perv=%.3f\nPctZero=%.3f\nPerc=%.3f\n", geti[num].shiyingdu, (int)geti[num].canshu[0], geti[num].canshu[1], geti[num].canshu[2], geti[num].canshu[3], geti[num].canshu[4], geti[num].canshu[5], geti[num].canshu[6], geti[num].canshu[7], geti[num].canshu[8], geti[num].canshu[9], geti[num].canshu[10],geti[num].canshu[11]);
 	
 	// --- report results
 	if (Fout.mode == SCRATCH_FILE) swmm_report();

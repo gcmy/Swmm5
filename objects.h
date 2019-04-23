@@ -1089,11 +1089,27 @@ typedef struct
    char          Enabled;         // TRUE if appears in report table
    int           Precision;       // number of decimal places when reported
 }  TRptField;
-typedef struct
+typedef struct                  //TVGM产流参数
 {
-	double          Wu;        // name of reported variable 
-	double          g1;      // units of reported variable
-	double          g2;         // TRUE if appears in report table
-	double          g3;       // number of decimal places when reported
+	double          Wu;       
+	double          g1;     
+	double          g2;        
+	double          g3;      
 	double          TP;
+	double          Perc;    //初始土壤含水量的比例
 }  TVGM;
+
+typedef struct                   //曼宁系数
+{
+	double          N_Imperv;        //不透水区曼宁系数
+	double          N_Perv;          //透水区曼宁系数
+	double          Rougness;         //管网曼宁系数
+} MANNING;
+
+typedef struct                   //洼地蓄积量参数
+{
+	double          S_Imperv;        //不透水区洼蓄量
+	double          S_Perv;          //透水区洼蓄量
+	double          PctZero;         //无洼蓄不透水率
+} STORAGES;
+

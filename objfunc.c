@@ -9,7 +9,7 @@
 extern REAL4* NodeResults;
 struct Gene
 {
-	double canshu[5];
+	double canshu[12];
 	double shiyingdu;
 };
 int     period, k;

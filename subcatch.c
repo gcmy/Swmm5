@@ -131,10 +131,10 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
 {
     int    i, k, m;
     char*  id;
-    double x[14];
+    double x[9];
 
     // --- check for enough tokens
-    if ( ntoks < 13 ) return error_setInpError(ERR_ITEMS, "");
+    if ( ntoks < 8 ) return error_setInpError(ERR_ITEMS, "");
 
     // --- check that named subcatch exists
     id = project_findID(SUBCATCH, tok[0]);
@@ -154,19 +154,19 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
         return error_setInpError(ERR_NAME, tok[2]);
 
     // --- read area, %imperv, width, slope, & curb length
-    for ( i = 3; i < 13; i++)
+    for ( i = 3; i < 8; i++)
     {
         if ( ! getDouble(tok[i], &x[i]) || x[i] < 0.0 )
             return error_setInpError(ERR_NUMBER, tok[i]);
     }
 
     // --- if snowmelt object named, check that it exists
-    x[13] = -1;
-    if ( ntoks > 13 )
+    x[8] = -1;
+    if ( ntoks > 8 )
     {
         k = project_findObject(SNOWMELT, tok[13]);
         if ( k < 0 ) return error_setInpError(ERR_NAME, tok[13]);
-        x[13] = k;
+        x[8] = k;
     }
 
     // --- assign input values to subcatch's properties
@@ -179,13 +179,13 @@ int  subcatch_readParams(int j, char* tok[], int ntoks)
     Subcatch[j].width       = x[5] / UCF(LENGTH);
     Subcatch[j].slope       = x[6] / 100.0;
     Subcatch[j].curbLength  = x[7];
-	Subcatch[j].Wu = x[8];
-	Subcatch[j].oldW = Subcatch[j].Wu *  1 / 3 ;
-	Subcatch[j].newW = Subcatch[j].Wu * 1 / 3;
-	Subcatch[j].g1 = x[9];
-	Subcatch[j].g2 = x[10];
-	Subcatch[j].g3 = x[11];
-	Subcatch[j].TP = x[12];
+	Subcatch[j].Wu = Tvgm_cs.Wu;
+	Subcatch[j].oldW = Tvgm_cs.Wu *  Tvgm_cs.Perc ;
+	Subcatch[j].newW = Tvgm_cs.Wu * Tvgm_cs.Perc;
+	Subcatch[j].g1 = Tvgm_cs.g1;
+	Subcatch[j].g2 = Tvgm_cs.g2;
+	Subcatch[j].g3 = Tvgm_cs.g3;
+	Subcatch[j].TP = Tvgm_cs.TP;
     // --- create the snow pack object if it hasn't already been created
     if ( x[12] >= 0 )
     {
@@ -241,17 +241,25 @@ int subcatch_readSubareaParams(char* tok[], int ntoks)
     }
 
     // --- assign input values to each type of subarea
-    Subcatch[j].subArea[IMPERV0].N = x[0];
-    Subcatch[j].subArea[IMPERV1].N = x[0];
-    Subcatch[j].subArea[PERV].N    = x[1];
+    //Subcatch[j].subArea[IMPERV0].N = x[0];
+    //Subcatch[j].subArea[IMPERV1].N = x[0];
+    //Subcatch[j].subArea[PERV].N    = x[1];
 
-    Subcatch[j].subArea[IMPERV0].dStore = 0.0;
-    Subcatch[j].subArea[IMPERV1].dStore = x[2] / UCF(RAINDEPTH);
-    Subcatch[j].subArea[PERV].dStore    = x[3] / UCF(RAINDEPTH);
+    //Subcatch[j].subArea[IMPERV0].dStore = 0.0;
+    //Subcatch[j].subArea[IMPERV1].dStore = x[2] / UCF(RAINDEPTH);
+    //Subcatch[j].subArea[PERV].dStore    = x[3] / UCF(RAINDEPTH);
 
     Subcatch[j].subArea[IMPERV0].fArea  = Subcatch[j].fracImperv * x[4] / 100.0;
     Subcatch[j].subArea[IMPERV1].fArea  = Subcatch[j].fracImperv * (1.0 - x[4] / 100.0);
     Subcatch[j].subArea[PERV].fArea     = (1.0 - Subcatch[j].fracImperv);
+
+	Subcatch[j].subArea[IMPERV0].N = Mannings.N_Imperv;
+	Subcatch[j].subArea[IMPERV1].N = Mannings.N_Imperv;
+	Subcatch[j].subArea[PERV].N = Mannings.N_Perv;
+
+	Subcatch[j].subArea[IMPERV0].dStore = 0.0;
+	Subcatch[j].subArea[IMPERV1].dStore = Storages.S_Imperv / UCF(RAINDEPTH);
+	Subcatch[j].subArea[PERV].dStore=Storages.S_Perv/ UCF(RAINDEPTH);
 
     // --- assume that all runoff from each subarea goes to subcatch outlet
     for (i = IMPERV0; i <= PERV; i++)
@@ -869,16 +877,16 @@ double getRunoffTVGM_1(int j, int i, double precip, double evap,
 	
 
 	x = Subcatch[j].oldW;
-	//double Wu = Subcatch[j].Wu;
-	//double g1 = Subcatch[j].g1;
-	//double g2 = Subcatch[j].g2;
-	//double g3 = Subcatch[j].g3;
-	//double TP = Subcatch[j].TP;  
-	double Wu = Tvgm_cs.Wu;
+	double Wu = Subcatch[j].Wu;
+	double g1 = Subcatch[j].g1;
+	double g2 = Subcatch[j].g2;
+	double g3 = Subcatch[j].g3;
+	double TP = Subcatch[j].TP;  
+	/*double Wu = Tvgm_cs.Wu;
 	double g1 = Tvgm_cs.g1;
 	double g2 = Tvgm_cs.g2;
 	double g3 = Tvgm_cs.g3;
-	double TP = Tvgm_cs.TP;
+	double TP = Tvgm_cs.TP;*/
 
 	if (!IgnoreGwater && Subcatch[j].groundwater)
 	{

@@ -160,3 +160,5 @@ EXTERN TTransect* Transect;                 // Array of transect data
 EXTERN TShape*    Shape;                    // Array of custom conduit shapes
 EXTERN TEvent*    Event;                    // Array of routing events         //(5.1.011)
 EXTERN TVGM Tvgm_cs;                        // TVGM参数
+EXTERN MANNING Mannings;                   //曼宁系数
+EXTERN STORAGES Storages;                 //洼蓄参数
