@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include<math.h>
 #include<time.h>
+#include "headers.h"
 #define random(x) (rand()%x)
 #define N 50
 #define lchrom 7
@@ -45,13 +46,14 @@ void mutation(struct Gene geti[],double min[], double max[],double outflow[],dou
 					k = k - m;
 				else k = k + m;
 			}
-			fubei[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
+			double a = (pow(2, lchrom) - 1);
+			geti[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 		}
 	}
-		swmm_process(fubei[i],f1,f2,f3);
-		geti[i].shiyingdu = objfunc(outflow, var);
-		if (fubei[i].shiyingdu>geti[i].shiyingdu)
-		geti[i] = fubei[i];
+		swmm_process(geti[i],f1,f2,f3);
+ 		geti[i].shiyingdu = objfunc(outflow, var);
+		/*if (fubei[i].shiyingdu>geti[i].shiyingdu)
+		geti[i] = fubei[i];*/
 	}
 	
 }
