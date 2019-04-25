@@ -144,7 +144,7 @@ static int  DoRouting;            // TRUE if flow routing is computed
 
 double min[12] = { 20, 0, 0.5, 0.01,0.5,0.01,0.1,0.011,0.2,2,5,0 };
 double max[12] = { 100,1,1,1,1,0.033,0.8,0.015,10,10,50,1 };
-int daishu = 3;
+int daishu = 10;
 const int N=50;
 //-----------------------------------------------------------------------------
 //  External functions (prototyped in swmm5.h)
@@ -380,7 +380,7 @@ int  DLLEXPORT  swmm_run1(char* f1, char* f2, char* f3)
 	for (j = 0; j < daishu; j++)
 	{
 		generation(geti, min, max, outflow, shice,f1,f2,f3);//交叉操作
-		//mutation(geti, min, max, outflow, shice,f1,f2,f3);//变异操作
+		mutation(geti, min, max, outflow, shice,f1,f2,f3);//变异操作
 	}
 	double best = geti[0].shiyingdu;
 	int num = 0;

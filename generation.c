@@ -27,17 +27,11 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 	struct Gene fubei[N];
 	unsigned int i, j, k, m, l, n, g, h;
 	double b, c, d, e;
-	for (i = 0, h = 0, k = 0, c = geti[i].shiyingdu; i < N; i++)//记录适应度里最大值
+	for (i = 0; i < N; i++)   //将geti的值都赋给fubei
 	{
 		fubei[i] = geti[i];
-		b = geti[i].shiyingdu;
-		if (b>c)
-		{
-			c = b;
-			h = i;
-		}
 	}
-	for (i = 0; i < N; i = i + 2)//用位运算进行交叉
+	for (i = 0; i < N; i = i + 2)//用位运算进行交叉,dui geti进行交叉运算
 	{
 		e = random(10000) / 10000.0;
 		if (e < pcross)
@@ -60,25 +54,24 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 				k = (k >> (lchrom - l));
 				m = m + k;
 				k = n;
-				fubei[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
-				fubei[i + 1].canshu[j] = m / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
+				geti[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
+				geti[i + 1].canshu[j] = m / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 			}
 		}
-		swmm_process(geti[i],f1,f2,f3);
+		swmm_process(geti[i],f1,f2,f3);     //将新生成的geti带入程序中，算出新的适应度
 		geti[i].shiyingdu = objfunc(outflow, var);
+		swmm_close();
+		swmm_process(geti[i + 1], f1, f2, f3);
+		geti[i+1].shiyingdu = objfunc(outflow, var);
+		swmm_close();
 	}
-	for (i = 0, j = 0, k = 0, m = 0, e = fubei[i].shiyingdu; i < N; i++)//记录适应度里最小值
+	for (i = 0; i < N; i++)    //用新生成的geti与前一代的fubei进行对比，如果fubei更优，就将fubei赋予geti，从而生成新的一代
 	{
-
-		b = fubei[i].shiyingdu;
-		if (b <e)
-		{
-			m = i;
-			e = b;
-		}
+		if (geti[i].shiyingdu < fubei[i].shiyingdu)
+		geti[i] = fubei[i];
+	
 	}
-	if (c>e)
-		fubei[m] = geti[h];//将父辈最大值替换子倍最小
+	
 
 
 }

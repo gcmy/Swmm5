@@ -49,11 +49,12 @@ void mutation(struct Gene geti[],double min[], double max[],double outflow[],dou
 			double a = (pow(2, lchrom) - 1);
 			geti[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 		}
-	}
-		swmm_process(geti[i],f1,f2,f3);
+	}//通过变异获得新的geti
+		swmm_process(geti[i], f1, f2, f3);
  		geti[i].shiyingdu = objfunc(outflow, var);
-		/*if (fubei[i].shiyingdu>geti[i].shiyingdu)
-		geti[i] = fubei[i];*/
+		if (fubei[i].shiyingdu>geti[i].shiyingdu)   //与变异之前的geti也就是父辈进行比较，如果前一代更好，就依旧保持前一代的结果
+		geti[i] = fubei[i];
+		swmm_close();
 	}
 	
 }

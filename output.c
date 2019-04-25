@@ -416,24 +416,24 @@ void output_saveResults(double reportTime)
 //  Purpose: writes computed results for current report time to binary file.
 //
 {
-    int i;
-    DateTime reportDate = getDateTime(reportTime);
-    REAL8 date;
+	int i;
+	DateTime reportDate = getDateTime(reportTime);
+	REAL8 date;
 
-    if ( reportDate < ReportStart ) return;
-    for (i=0; i<MAX_SYS_RESULTS; i++) SysResults[i] = 0.0f;
-    date = reportDate;
-    fwrite(&date, sizeof(REAL8), 1, Fout.file);
-    if (Nobjects[SUBCATCH] > 0)
-        output_saveSubcatchResults(reportTime, Fout.file);
-    if (Nobjects[NODE] > 0)
-        output_saveNodeResults(reportTime, Fout.file);
-    if (Nobjects[LINK] > 0)
-        output_saveLinkResults(reportTime, Fout.file);
-    fwrite(SysResults, sizeof(REAL4), MAX_SYS_RESULTS, Fout.file);
-    if ( Foutflows.mode == SAVE_FILE && !IgnoreRouting ) 
-        iface_saveOutletResults(reportDate, Foutflows.file);
-    Nperiods++;
+	if (reportDate < ReportStart) return;
+	for (i = 0; i < MAX_SYS_RESULTS; i++) SysResults[i] = 0.0f;
+	date = reportDate;
+	fwrite(&date, sizeof(REAL8), 1, Fout.file);
+	if (Nobjects[SUBCATCH] > 0)
+		output_saveSubcatchResults(reportTime, Fout.file);
+	if (Nobjects[NODE] > 0)
+		output_saveNodeResults(reportTime, Fout.file);
+	if (Nobjects[LINK] > 0)
+		output_saveLinkResults(reportTime, Fout.file);
+	fwrite(SysResults, sizeof(REAL4), MAX_SYS_RESULTS, Fout.file);
+	if (Foutflows.mode == SAVE_FILE && !IgnoreRouting)
+		iface_saveOutletResults(reportDate, Foutflows.file);
+	Nperiods++;
 }
 
 //=============================================================================

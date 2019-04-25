@@ -38,7 +38,7 @@ void initpoop(struct Gene geti[], double min[], double max[], double outflow[], 
 		swmm_process(geti[i],f1,f2,f3);
 
 		geti[i].shiyingdu = objfunc(outflow, var);
-	
+		swmm_close();
 	}
 	
 	for (i = 0; i < N; i++)
