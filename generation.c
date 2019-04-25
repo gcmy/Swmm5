@@ -25,16 +25,17 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 	FILE *fp;
 	srand((int)time(0));
 	struct Gene fubei[N];
+	struct Gene temporary;
 	unsigned int i, j, k, m, l, n, g, h;
 	double b, c, d, e;
 	for (i = 0, h = 0, k = 0, c = geti[i].shiyingdu; i < N; i++)//记录适应度里最大值
-	{
-		fubei[i] = geti[i];
+	{		
 		b = geti[i].shiyingdu;
 		if (b>c)
 		{
+			temporary = geti[i];
 			c = b;
-			h = i;
+
 		}
 	}
 	for (i = 0; i < N; i = i + 2)//用位运算进行交叉
@@ -44,8 +45,8 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 		{
 			for (j = 0; j < 12; j++)
 			{
-				k = (int)((fubei[i].canshu[j] - min[j]) / (max[j] - min[j])*(pow(2, lchrom) - 1));
-				m = (int)((fubei[i + 1].canshu[j] - min[j]) / (max[j] - min[j])*(pow(2, lchrom) - 1));
+				k = (int)((geti[i].canshu[j] - min[j]) / (max[j] - min[j])*(pow(2, lchrom) - 1));
+				m = (int)((geti[i + 1].canshu[j] - min[j]) / (max[j] - min[j])*(pow(2, lchrom) - 1));
 				n = k;
 				g = m;
 				l = random(lchrom);//确定交叉位置
@@ -60,16 +61,26 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 				k = (k >> (lchrom - l));
 				m = m + k;
 				k = n;
+				double x = pow(2, lchrom) - 1;
+				double y  = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 				fubei[i].canshu[j] = k / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
 				fubei[i + 1].canshu[j] = m / (pow(2, lchrom) - 1)*(max[j] - min[j]) + min[j];
-			}
+			}	
+			swmm_process(fubei[i], f1, f2, f3);
+			fubei[i].shiyingdu = objfunc(outflow, var);
+			swmm_process(fubei[i + 1], f1, f2, f3);
+			fubei[i + 1].shiyingdu = objfunc(outflow, var);
 		}
-		swmm_process(geti[i],f1,f2,f3);
-		geti[i].shiyingdu = objfunc(outflow, var);
+		else
+		{
+			fubei[i] = geti[i];
+			fubei[i + 1] = geti[i + 1];
+		}
+		continue;
 	}
 	for (i = 0, j = 0, k = 0, m = 0, e = fubei[i].shiyingdu; i < N; i++)//记录适应度里最小值
 	{
-
+		geti[i] = fubei[i];
 		b = fubei[i].shiyingdu;
 		if (b <e)
 		{
@@ -78,7 +89,7 @@ void generation(struct Gene geti[], double min[], double max[], double outflow[]
 		}
 	}
 	if (c>e)
-		fubei[m] = geti[h];//将父辈最大值替换子倍最小
+		geti[m] = temporary;//将父辈最大值替换子倍最小
 
 
 }

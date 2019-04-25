@@ -374,10 +374,10 @@ int  DLLEXPORT  swmm_run1(char* f1, char* f2, char* f3)
 	int j;
 	double h = daishu;
 	struct Gene geti[50], *p1 = geti;//种群个体数
-	fileread("C:\\Users\\Zhang Yin\\Desktop\\UTVGM-SWMM\\TVGM-SWMM-GA\\20190402\\swmm5\\outflow.txt", outflow);
+	fileread("C:\\Users\\Zhang Yang\\Desktop\\outflow.txt", outflow);
 	double shice = var(outflow, 49);
 	initpoop(geti, min, max, outflow, shice,f1,f2,f3);
-	for (j = 0; j < daishu; j++)
+	for (j = 0; j < 5; j++)
 	{
 		generation(geti, min, max, outflow, shice,f1,f2,f3);//交叉操作
 		//mutation(geti, min, max, outflow, shice,f1,f2,f3);//变异操作
@@ -525,6 +525,11 @@ int DLLEXPORT swmm_start(int saveResults)
 ////  Following section modified for release 5.1.008.  ////                    //(5.1.008)
 ////
         // --- open binary output file
+		//if ((Fout.file = fopen(Fout.name, "w+b")) == NULL)
+		//{
+		//	writecon(FMT14);
+		//	ErrorCode = ERR_OUT_FILE;
+		//}
         output_open();
 
         // --- open runoff processor
@@ -702,12 +707,12 @@ int DLLEXPORT swmm_end(void)
         // --- write ending records to binary output file
         if ( Fout.file ) output_end();
 
-        // --- report mass balance results and system statistics
-        if ( !ErrorCode )
-        {
-            massbal_report();
-            stats_report();
-        }
+        //// --- report mass balance results and system statistics
+        //if ( !ErrorCode )
+        //{
+        //    massbal_report();
+        //    stats_report();
+        //}
 
         // --- close all computing systems
         stats_close();
